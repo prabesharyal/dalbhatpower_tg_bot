@@ -83,6 +83,6 @@ async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             resp = await TelethonModuleByME.send_audio_to_chat(filename,CAPTION)
             fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
             frommesid = resp.id
-            await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION)
+            await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid)
         os.remove(filename)
     print("%50s"%"Done\n")
