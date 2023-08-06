@@ -1,0 +1,12 @@
+fuzzywuzzy
+yt-dlp
+ffmpeg
+python-Levenshtein
+requests
+json
+python-dotenv
+os
+rich
+contextlib
+python-telegram-bot
+nepali_datetime
