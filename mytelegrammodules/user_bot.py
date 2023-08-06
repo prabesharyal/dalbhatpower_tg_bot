@@ -17,14 +17,14 @@ class TelethonModuleByME():
                           'bytes: {:.2%}'.format(current / total))
   
         # Function to send video to chat
-    async def send_video_to_chat(video_file_path):
+    async def send_video_to_chat(video_file_path,CAPTION):
         async with TelegramClient(session, api_id, api_hash) as client:
-            a= await client.send_file(chat_id, video_file_path, supports_streaming=True, progress_callback=TelethonModuleByME.callback)
+            a= await client.send_file(chat_id, video_file_path,caption=CAPTION, parse_mode='HTML', supports_streaming=True, progress_callback=TelethonModuleByME.callback)
             return a
     # Function to send audio to chat
-    async def send_audio_to_chat(audio_file_path):
+    async def send_audio_to_chat(audio_file_path, CAPTION):
         async with TelegramClient(session, api_id, api_hash) as client:
-            a= await client.send_file(chat_id, audio_file_path, progress_callback=TelethonModuleByME.callback, supports_streaming=True)
+            a= await client.send_file(chat_id, audio_file_path,caption=CAPTION, parse_mode='HTML', progress_callback=TelethonModuleByME.callback, supports_streaming=True)
             return a
 
 # async def main():

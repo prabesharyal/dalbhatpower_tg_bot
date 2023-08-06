@@ -56,10 +56,10 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if is_file_size_less_than_50mb(filename):
                 await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
             else :
-                resp = await TelethonModuleByME.send_video_to_chat(filename)
+                resp = await TelethonModuleByME.send_video_to_chat(filename,CAPTION)
                 fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
                 frommesid = resp.id
-                await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION)
+                await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid)
         os.remove(filename)
     print("%50s"%"Done\n")
 
@@ -80,7 +80,7 @@ async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if check == True:
             resp =await update.message.reply_audio(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
         else :
-            resp = await TelethonModuleByME.send_audio_to_chat(filename)
+            resp = await TelethonModuleByME.send_audio_to_chat(filename,CAPTION)
             fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
             frommesid = resp.id
             await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION)
