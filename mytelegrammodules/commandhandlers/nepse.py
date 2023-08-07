@@ -3,11 +3,10 @@ from mytelegrammodules.commandhandlers.commonimports import *
 async def nepse(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     json = update.message.from_user
 # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
-    print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Issued NEPSE Command")
-    texter = update.message.chat.full_name
+    print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Issued NEPSE Command ")
     # print(str(texter)+" issued a NEPSE command.")
     receivedstring = update.message.text
-    print(str(texter)+" issued a NEPSE command." + str(receivedstring))
+    print(str(receivedstring))
     splitted = receivedstring.split(' ')
 
     if len(splitted) == 1:

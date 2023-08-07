@@ -46,17 +46,17 @@ def main() -> None:
 
     
     #NEPSE
-    application.add_handler(CommandHandler("nepse", nepse))
+    application.add_handler(CommandHandler("nepse", nepse,block=False))
 
     #YTDLP
-    application.add_handler(CommandHandler("video", video))
-    application.add_handler(CommandHandler("audio", audio))
+    application.add_handler(CommandHandler("video", video, block=False))
+    application.add_handler(CommandHandler("audio", audio, block=False))
     
     application.add_handler(InlineQueryHandler(inline_query))
     
     
     #For Short Video Links in Messages
-    application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download))
+    application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download, block=False))
 
 #  insta+yt+tiktok = (?:https?://)?(?:(?:www|m)\.)?(?:instagram\.com/reels/[-a-zA-Z0-9_]+|youtu(?:be\.com/shorts/|\.be/)|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+)'
 
