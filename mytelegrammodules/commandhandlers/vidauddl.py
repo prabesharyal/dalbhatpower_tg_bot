@@ -58,10 +58,13 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 with Loader("Uploading Manual Short Video : ","Manual Short Video Upload Success"):
                     await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
             else :
-                resp = await TelethonModuleByME.send_video_to_chat(filename)
-                fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
-                frommesid = resp.id
-                await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+                try:
+                    resp = await TelethonModuleByME.send_video_to_chat(filename)
+                    fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
+                    frommesid = resp.id
+                    await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+                except Exception as e:
+                    print(e)
             os.remove(filename)
     print("%50s"%"Done\n")
 
@@ -84,9 +87,12 @@ async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 with Loader("Uploading Short Audio : ","Short Audio Upload Success"):
                     await update.message.reply_audio(audio=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML')
             else :
-                resp = await TelethonModuleByME.send_audio_to_chat(filename)
-                fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
-                frommesid = resp.id
-                await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+                try:
+                    resp = await TelethonModuleByME.send_audio_to_chat(filename)
+                    fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
+                    frommesid = resp.id
+                    await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+                except Exception as e:
+                    print (e)
             os.remove(filename)
     print("%50s"%"Done\n")
