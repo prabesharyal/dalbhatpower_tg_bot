@@ -17,5 +17,4 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     DBMSSimple.update_data(chatid,texter,username,group)
     await update.message.reply_html(
         rf"Dear {user.mention_html()}, Bot is active, Send /help for any queries regarding how to use bot.", reply_markup=ReplyKeyboardRemove(selective=True))
-    print("%50s"%"Done\n")
 

@@ -46,6 +46,7 @@ class theOPDownloader():
                 filepath=ydl.prepare_filename(info)
                 video_title = info['title']           
             video_title = self.convert_html(video_title)
+            filepath = filepath.replace('.m4a', '.mp3')
             filepath = os.path.join(os.getcwd(), filepath)
             CAPTION = '<a href="{}">{}</a>'.format(link,video_title)
             return CAPTION, filepath , True

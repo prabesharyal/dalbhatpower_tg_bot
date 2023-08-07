@@ -34,8 +34,9 @@ async def short_vid_download(update: Update, context: ContextTypes.DEFAULT_TYPE)
     for url in entries:
         CAPTION, filename,check = download.short_vids(url)
         if check == True:
-            await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
-    os.remove(filename)
+            with Loader("Uploading Tiktok/YtShort : ","Tiktok/YtShort Upload Success"):
+                await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
+            os.remove(filename)
     print("%50s"%"Done\n")
 
 
@@ -54,13 +55,14 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         CAPTION, filename,check = download.download_video(url)
         if check == True:
             if is_file_size_less_than_50mb(filename):
-                await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
+                with Loader("Uploading Manual Short Video : ","Manual Short Video Upload Success"):
+                    await update.message.reply_video(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
             else :
-                resp = await TelethonModuleByME.send_video_to_chat(filename,CAPTION)
+                resp = await TelethonModuleByME.send_video_to_chat(filename)
                 fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
                 frommesid = resp.id
-                await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid)
-        os.remove(filename)
+                await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+            os.remove(filename)
     print("%50s"%"Done\n")
 
 async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -78,11 +80,13 @@ async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         CAPTION, filename,check = download.download_audio(url)
         # await context.bot.send_video(chat_id=update.message.chat_id, video=open(filename, 'rb'), supports_streaming=True,caption = CAPTION, parse_mode='HTML')
         if check == True:
-            resp =await update.message.reply_audio(video=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML',supports_streaming=True)
-        else :
-            resp = await TelethonModuleByME.send_audio_to_chat(filename,CAPTION)
-            fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
-            frommesid = resp.id
-            await context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid)
-        os.remove(filename)
+            if is_file_size_less_than_50mb(filename):
+                with Loader("Uploading Short Audio : ","Short Audio Upload Success"):
+                    await update.message.reply_audio(audio=open(filename, 'rb'), caption=CAPTION,disable_notification=True,parse_mode='HTML')
+            else :
+                resp = await TelethonModuleByME.send_audio_to_chat(filename)
+                fromchatid= int(os.environ.get('TG_APP_CHAT_ID'))
+                frommesid = resp.id
+                await context.bot.copy_message(chat_id=update.effective_chat.id, from_chat_id=fromchatid, message_id=frommesid, caption=CAPTION,parse_mode='HTML')
+            os.remove(filename)
     print("%50s"%"Done\n")

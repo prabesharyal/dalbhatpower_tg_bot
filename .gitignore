@@ -4,4 +4,4 @@
 **/**/__pycache__
 **/**/downloads
 **/**/test**
-**/**/*db.json
+/mytelegrammodules/database/db.json
