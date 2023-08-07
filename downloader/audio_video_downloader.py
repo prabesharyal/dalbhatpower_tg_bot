@@ -1,6 +1,6 @@
 import yt_dlp
 import requests,re
-import os
+import os, shutil
 
 class theOPDownloader():
     
@@ -45,11 +45,17 @@ class theOPDownloader():
                 info = ydl.extract_info(link,download=True)   
                 filepath=ydl.prepare_filename(info)
                 video_title = info['title']           
+            video_title = self.caption if video_title == '' else video_title
+
             video_title = self.convert_html(video_title)
             filepath = filepath.replace('.m4a', '.mp3')
             filepath = os.path.join(os.getcwd(), filepath)
             CAPTION = '<a href="{}">{}</a>'.format(link,video_title)
-            return CAPTION, filepath , True
+            if os.path.isfile(filepath):
+                return CAPTION, filepath , True
+            else:
+                shutil.rmtree(os.path.join(os.getcwd(), 'downloads'))
+                raise Exception
         except Exception as e:
             print(e)
             return "Couldn't download Audio", None, False
@@ -73,10 +79,15 @@ class theOPDownloader():
                 info = ydl.extract_info(link,download=True)   
                 filepath=ydl.prepare_filename(info)
                 video_title = info['title']           
+            video_title = self.caption if video_title == '' else video_title
             video_title = self.convert_html(video_title)
             filepath = os.path.join(os.getcwd(), filepath)
             CAPTION = '<a href="{}">{}</a>'.format(link,video_title)
-            return CAPTION, filepath , True
+            if os.path.isfile(filepath):
+                return CAPTION, filepath , True
+            else:
+                shutil.rmtree(os.path.join(os.getcwd(), 'downloads'))
+                raise Exception
         except Exception as e:
             print(e)
             return "Couldn't download Video", None, False
@@ -109,6 +120,8 @@ class theOPDownloader():
             CAPTION = '<a href="{}">{}</a>'.format(link,video_title)
             return CAPTION, filepath, True    
         except Exception as e:
+            print(e)
+            shutil.rmtree(os.path.join(os.getcwd(), 'downloads'))
             return None, None, False
         #InstaPattern Not Supported
         
