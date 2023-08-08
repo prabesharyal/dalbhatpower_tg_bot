@@ -54,8 +54,8 @@ def main() -> None:
     application.add_handler(CommandHandler("audio", audio, block=False))
     
     #instaloader
-    application.add_handler(CommandHandler("ig", instagram_dl, block=False))
-    application.add_handler(CommandHandler("instagram", instagram_dl, block=False))
+    # application.add_handler(CommandHandler("ig", instagram_dl, block=False))
+    # application.add_handler(CommandHandler("instagram", instagram_dl, block=False))
     
     application.add_handler(InlineQueryHandler(inline_query))
     

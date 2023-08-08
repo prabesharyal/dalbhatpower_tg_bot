@@ -16,11 +16,11 @@ def convert_html(string):
 def download_from_shortcode(shortcode):
     # Create an instance of instaloader with only_download option
     loader = instaloader.Instaloader(download_video_thumbnails=False, save_metadata=False, post_metadata_txt_pattern='',sanitize_paths=True)
-    try:
-        loader.load_session_from_file(username = os.getenv('ig_session_USER'),filename = os.getenv('ig_session_USER_file'))
-        print("Insta Login Success")
-    except Exception as e:
-        print("Instagarm Login Failed")   
+    # try:
+    #     loader.load_session_from_file(username = os.getenv('ig_session_USER'),filename = os.getenv('ig_session_USER_file'))
+    #     print("Insta Login Success")
+    # except Exception as e:
+    #     print("Instagarm Login Failed")   
     # Check if the link is valid
     try:
         post = instaloader.Post.from_shortcode(loader.context, shortcode)
@@ -28,7 +28,7 @@ def download_from_shortcode(shortcode):
         CAPTION= "✨" if CAPTION=='' else CAPTION   
         CAPTION = convert_html(CAPTION)
         # Download the post or reel
-        download = loader.download_post(post, target='downloads')
+        loader.download_post(post, target='downloads')
         filenames = [os.path.join(os.getcwd(),'downloads',post) for post in os.listdir('downloads')]
         return CAPTION, filenames, True
     except Exception as e:
