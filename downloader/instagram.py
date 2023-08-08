@@ -11,11 +11,16 @@ def convert_html(string):
     return string
 
 
-# Create an instance of instaloader with only_download option
-loader = instaloader.Instaloader(download_video_thumbnails=False, save_metadata=False, post_metadata_txt_pattern='',sanitize_paths=True)
-
-# Define a function to download posts and reels from a link
+    
+    
 def download_from_shortcode(shortcode):
+    # Create an instance of instaloader with only_download option
+    loader = instaloader.Instaloader(download_video_thumbnails=False, save_metadata=False, post_metadata_txt_pattern='',sanitize_paths=True)
+    try:
+        loader.load_session_from_file(username = os.getenv('ig_session_USER'),filename = os.getenv('ig_session_USER_file'))
+        print("Insta Login Success")
+    except Exception as e:
+        print("Instagarm Login Failed")   
     # Check if the link is valid
     try:
         post = instaloader.Post.from_shortcode(loader.context, shortcode)
@@ -27,6 +32,7 @@ def download_from_shortcode(shortcode):
         filenames = [os.path.join(os.getcwd(),'downloads',post) for post in os.listdir('downloads')]
         return CAPTION, filenames, True
     except Exception as e:
+        print(e)
         return None, None, False
     
 # print(download_from_link('https://www.instagram.com/p/CvpnA3Et9Nt/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=='))
