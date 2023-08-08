@@ -22,6 +22,8 @@ def is_file_size_less_than_50mb(file_path):
 
 
 async def short_vid_download(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
+
     download=theOPDownloader()
     json = update.message.from_user
     # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
@@ -41,6 +43,8 @@ async def short_vid_download(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
+
     json = update.message.from_user
     # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
     print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Issued Video Command")
@@ -69,6 +73,8 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("%50s"%"Done\n")
 
 async def audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
+
     json = update.message.from_user
     # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
     print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Issued Audio Command")

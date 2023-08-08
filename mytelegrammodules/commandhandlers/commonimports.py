@@ -3,7 +3,7 @@
 #                    Import System modules
 # ---------------------------------------------------------------- #
 
-import os, re, sys,json,ast
+import os, re, sys,json,ast,shutil
 import requests
 import time, datetime,nepali_datetime
 
@@ -17,7 +17,7 @@ import time, datetime,nepali_datetime
 # ---------------------------------------------------------------- #
 
 #Import Telegram Features
-from telegram import InputMediaAudio, InputMediaVideo, Update, ReplyKeyboardRemove,InlineQueryResultArticle, InputTextMessageContent
+from telegram import InputMediaAudio, InputMediaVideo, InputMediaPhoto, Update, ReplyKeyboardRemove,InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, Updater, InlineQueryHandler
 
 
@@ -44,7 +44,7 @@ from mytelegrammodules.database.databasemanager import DBMSSimple
 from NEPAL.NEPSE.nepse import NepalStock
 
 from downloader.audio_video_downloader import theOPDownloader
-
+from downloader.instagram import download_from_shortcode
 
 
 # ---------------------------------------------------------------- #

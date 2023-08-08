@@ -4,6 +4,7 @@ from mytelegrammodules.commandhandlers.inlinedict import *
 from mytelegrammodules.commandhandlers.nepcal import *
 from mytelegrammodules.commandhandlers.nepse import *
 from mytelegrammodules.commandhandlers.vidauddl import *
+from mytelegrammodules.commandhandlers.ig_dl_instaloader import *
 
 
 API_HASH = TG_BOT = os.getenv('TG_BOT_TOKEN')
@@ -52,11 +53,16 @@ def main() -> None:
     application.add_handler(CommandHandler("video", video, block=False))
     application.add_handler(CommandHandler("audio", audio, block=False))
     
+    #instaloader
+    application.add_handler(CommandHandler("ig", instagram_dl, block=False))
+    application.add_handler(CommandHandler("instagram", instagram_dl, block=False))
+    
     application.add_handler(InlineQueryHandler(inline_query))
     
     
     #For Short Video Links in Messages
     application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download, block=False))
+    application.add_handler(MessageHandler(filters.Regex('(https?:\/\/(?:(www|m)\.)?instagram\.com\/(p|reel)\/([^/?#&\s]+))') & ~filters.COMMAND, instagram_dl, block=False))
 
 #  insta+yt+tiktok = (?:https?://)?(?:(?:www|m)\.)?(?:instagram\.com/reels/[-a-zA-Z0-9_]+|youtu(?:be\.com/shorts/|\.be/)|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+)'
 
