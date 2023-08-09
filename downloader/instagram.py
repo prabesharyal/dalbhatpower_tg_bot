@@ -1,40 +1,128 @@
-# Import the instaloader module
-import instaloader
-import os
+import os,requests
+from utils.loader import Loader
 
-def convert_html(string):
-    string= string.replace('&', '&amp')
-    string= string.replace('"', '&quot')
-    string= string.replace("'", "&#039")
-    string= string.replace('<', '&lt')
-    string= string.replace('>', '&gt')
-    return string
+class ig_dlp(object):
+    '''An Instagram Downloader Module You Can't Ignore 
 
+    usage:
+    ig_dlp(link) : returns bool, caption, filepath_list
+    Type = Post-Video, Post-Image, Carousel, Public-Story, None '''
+
+    def __init__(self, link) -> None:
+        self.headers = {
+            "X-RapidAPI-Key": os.getenv('X_RapidAPI_Key'),
+            "X-RapidAPI-Host": os.getenv('X_RapidAPI_Host'),
+        }
+        self.querystring = {"url": link}
+        self.link = link
+        self.api = "https://instagram-downloader-download-instagram-videos-stories.p.rapidapi.com/index"
+
+    
+    def get_page_title(self,url):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an exception for bad status codes (4xx and 5xx)
+            
+            # Find the position of the opening and closing <title> tags
+            start_index = response.text.find('<title>')
+            end_index = response.text.find('</title>')
+            
+            if start_index != -1 and end_index != -1:
+                start_index += len('<title>')
+                return response.text[start_index:end_index]
+            else:
+                return None  # No title tag found
+            
+        except requests.exceptions.RequestException as e:
+            print("Couldn't Get Caption so replacing with ✨")
+            return "✨"
 
     
     
-def download_from_shortcode(shortcode):
-    # Create an instance of instaloader with only_download option
-    loader = instaloader.Instaloader(download_video_thumbnails=False, save_metadata=False, post_metadata_txt_pattern='',sanitize_paths=True)
-    # try:
-    #     loader.load_session_from_file(username = os.getenv('ig_session_USER'),filename = os.getenv('ig_session_USER_file'))
-    #     print("Insta Login Success")
-    # except Exception as e:
-    #     print("Instagarm Login Failed")   
-    # Check if the link is valid
-    try:
-        post = instaloader.Post.from_shortcode(loader.context, shortcode)
-        CAPTION = post.caption
-        CAPTION= "✨" if CAPTION=='' else CAPTION   
-        CAPTION = convert_html(CAPTION)
-        # Download the post or reel
-        loader.download_post(post, target='downloads')
-        filenames = [os.path.join(os.getcwd(),'downloads',post) for post in os.listdir('downloads')]
-        return CAPTION, filenames, True
-    except Exception as e:
-        print(e)
-        return None, None, False
+    def analyzeresponse(self,resposnsejson, urlll):
+        try:
+            if resposnsejson['Type'] == "Post-Video" or resposnsejson['Type']=='Post-Image' or resposnsejson['Type']=='Carousel':
+                # print(resposnsejson)
+                # thumbnail = resposnsejson["thumbnail"]
+                try:
+                    caption = resposnsejson["title"]
+                except KeyError:
+                    caption=self.get_page_title(urlll)
+                return resposnsejson['Type'], caption, resposnsejson['media'] if isinstance(resposnsejson['media'], list) else [resposnsejson['media']]
+        except KeyError as e:
+            # print('No Key named' + e)
+            try:
+                username = resposnsejson['username']
+                caption=f'Stories by {username}'
+                storylist = resposnsejson["stories"]
+                medialist=[]
+                for stories in storylist:
+                    medialist.append(stories['media'])
+                return 'Public-Story',caption,medialist
+            except KeyError as d:
+                # print('No Key named' + d)
+                return 'Unsupported-Type',None,[]
     
-# print(download_from_link('https://www.instagram.com/p/CvpnA3Et9Nt/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=='))
-# print(download_from_link('https://www.instagram.com/reel/CubZ5FMIwTh/?utm_source=ig_web_copy_link'))
-# print(download_from_link('https://www.instagram.com/reel/CubZ5FMIwTh/?utm_source=ig_web_copy_link'))
+    def download_media(self,url):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            filename = url.split('/')[-1].split('?')[0]
+            download_path = os.path.join('downloads', filename)
+
+            # Create the 'downloads' directory if it doesn't exist
+            os.makedirs('downloads', exist_ok=True)
+
+            with open(download_path, 'wb') as file:
+                file.write(response.content)
+            return os.path.join(os.getcwd(),download_path)
+
+        except requests.exceptions.RequestException as e:
+            print("Error:", e)
+            raise FileNotFoundError
+        
+    
+    def here_we_download(self,all_links):
+        filepath = []
+        for media_link in all_links:
+            file = self.download_media(media_link)
+            filepath.append(file)
+        return filepath
+        
+    def download(self):
+        with Loader("Requesting API....","API Response Received"):
+            response = requests.get(self.api, headers=self.headers, params=self.querystring)
+        with Loader("Extracting Required Headers"," "):
+            if response.status_code == 200:
+                makejson = response.json()
+                downloadType,CAPTION,download_list=self.analyzeresponse(makejson,self.link)
+                # print(downloadType)
+                # print(CAPTION)
+                # print(download_list)
+            else:                
+                print("\nAPI responded failure: " + str(response.status_code))
+                return False, None,[]
+        if downloadType=='Unsupported-Type':
+            print('The format is not supported yet.')
+            return False, None,[]
+        else:
+            with Loader("Download Started","Downloading Completed Successfully"):
+                files=self.here_we_download(download_list)
+                return downloadType, CAPTION, files
+            
+
+
+
+# link = 'https://www.instagram.com/p/CuXWxYkPx19/'
+# link ='https://www.instagram.com/reel/CvKawUbPRgn/?utm_source=ig_web_copy_link'
+# link='https://www.instagram.com/p/Cvt1onCOXSk/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=='
+# link = 'https://www.instagram.com/stories/evaaa.g__/3164772748186767392/'
+# ig_downloader = ig_dlp(link)
+# # caption, files = ig_downloader.download()
+# # print("Caption:", caption)
+# # print("Files:", files)
+# status,Cap,files=ig_downloader.download()
+# print(status)
+# print(Cap)
+# print(files)

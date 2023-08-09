@@ -44,7 +44,7 @@ from mytelegrammodules.database.databasemanager import DBMSSimple
 from NEPAL.NEPSE.nepse import NepalStock
 
 from downloader.audio_video_downloader import theOPDownloader
-from downloader.instagram import download_from_shortcode
+from downloader.instagram import *
 
 
 # ---------------------------------------------------------------- #
