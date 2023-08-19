@@ -8,3 +8,6 @@ rich
 python-telegram-bot
 nepali_datetime
 instaloader
+datetime
+python-dateutil
+telethon

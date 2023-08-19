@@ -21,12 +21,12 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
     print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Issued Help Command")
     
-    helptext = ''' ‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ ‎ ‎ ‎__(v0.1 Alpha release)__
+    helptext = ''' ‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ ‎ ‎ ‎__(v1.0 Beta release)__
     \n\t***Few help commands available.***\n \n
     \t`/start` - _Check whether bot is working or not._ 
     \t`/help` - _This menu is displayed._
 
-    \t`any message with tiktok or youtube short links ` - _Sends you video._ 
+    \t`any message with tiktok, instagram or youtube short links ` - _Sends you videos/photos._ 
     \t`@dalbhatpowerbot nepaliword` - _Can be Used to Search Nepali word._ 
 
     \t`/rashi Makar` - _Get Your Nepali Horoscope._
@@ -42,7 +42,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     \t`/video link` - _Downloads and send videos(1080p) upto 2 GB_
     \t`/audio link` - _Downloads and send audios(mp3) upto 2 GB_
 \n
-    \t`/ig link` - _Downloads and send instagram posts/reels(Not working)_
+    \t`/ig link` - _Downloads and send instagram posts/reels/stories_\n\n
 \t\t**Isn't this help enough ???**
 '''
     # await context.bot.send_message(chat_id=update.message.chat.id, text=helptext,parse_mode='MARKDOWN')
