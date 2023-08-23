@@ -1,4 +1,4 @@
-import os,requests
+import os, requests, json
 from utils.loader import Loader
 
 class ig_dlp(object):
@@ -7,63 +7,43 @@ class ig_dlp(object):
     usage:
     ig_dlp(link) : returns bool, caption, filepath_list
     Type = Post-Video, Post-Image, Carousel, Public-Story, None '''
-
-    def __init__(self, link) -> None:
-        self.headers = {
-            "X-RapidAPI-Key": os.getenv('X_RapidAPI_Key'),
-            "X-RapidAPI-Host": os.getenv('X_RapidAPI_Host'),
-        }
-        self.querystring = {"url": link}
-        self.link = link
-        self.api = "https://instagram-downloader-download-instagram-videos-stories.p.rapidapi.com/index"
-
     
-    def get_page_title(self,url):
+    def __init__(self, link) -> None:
+        # self.link = link
+        self.method = 'cobalt'
+        self.link = link
+        if self.method == 'cobalt':
+            self.headers = {
+                "content-type": "application/json",
+                "accept": "application/json",
+            }
+            self.body = {
+                        "url": link,
+                        "vCodec": "h264",
+                        "vQuality": "max"
+                    }
+            self.api = "https://co.wuk.sh/api/json"
+
+    def get_page_title(self, url):
         try:
             response = requests.get(url)
             response.raise_for_status()  # Raise an exception for bad status codes (4xx and 5xx)
-            
+
             # Find the position of the opening and closing <title> tags
             start_index = response.text.find('<title>')
             end_index = response.text.find('</title>')
-            
+
             if start_index != -1 and end_index != -1:
                 start_index += len('<title>')
                 return response.text[start_index:end_index]
             else:
                 return None  # No title tag found
-            
+
         except requests.exceptions.RequestException as e:
             print("Couldn't Get Caption so replacing with ✨")
             return "✨"
 
-    
-    
-    def analyzeresponse(self,resposnsejson, urlll):
-        try:
-            if resposnsejson['Type'] == "Post-Video" or resposnsejson['Type']=='Post-Image' or resposnsejson['Type']=='Carousel':
-                # print(resposnsejson)
-                # thumbnail = resposnsejson["thumbnail"]
-                try:
-                    caption = resposnsejson["title"]
-                except KeyError:
-                    caption=self.get_page_title(urlll)
-                return resposnsejson['Type'], caption, resposnsejson['media'] if isinstance(resposnsejson['media'], list) else [resposnsejson['media']]
-        except KeyError as e:
-            # print('No Key named' + e)
-            try:
-                username = resposnsejson['username']
-                caption=f'Stories by {username}'
-                storylist = resposnsejson["stories"]
-                medialist=[]
-                for stories in storylist:
-                    medialist.append(stories['media'])
-                return 'Public-Story',caption,medialist
-            except KeyError as d:
-                # print('No Key named' + d)
-                return 'Unsupported-Type',None,[]
-    
-    def download_media(self,url):
+    def download_media(self, url):
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -76,53 +56,57 @@ class ig_dlp(object):
 
             with open(download_path, 'wb') as file:
                 file.write(response.content)
-            return os.path.join(os.getcwd(),download_path)
+            return os.path.join(os.getcwd(), download_path)
 
         except requests.exceptions.RequestException as e:
             print("Error:", e)
             raise FileNotFoundError
-        
-    
-    def here_we_download(self,all_links):
+
+    def here_we_download(self, all_links):
         filepath = []
         for media_link in all_links:
             file = self.download_media(media_link)
             filepath.append(file)
         return filepath
-        
+
     def download(self):
-        with Loader("Requesting API....","API Response Received"):
-            response = requests.get(self.api, headers=self.headers, params=self.querystring)
-        with Loader("Extracting Required Headers"," "):
+        try:
+            with Loader("Requesting API....", "API Response Received✅"):
+                response = requests.post(
+                    self.api, headers=self.headers, data=json.dumps(self.body))
+                mydict = response.json()
             if response.status_code == 200:
-                makejson = response.json()
-                downloadType,CAPTION,download_list=self.analyzeresponse(makejson,self.link)
-                # print(downloadType)
-                # print(CAPTION)
-                # print(download_list)
-            else:                
-                print("\nAPI responded failure: " + str(response.status_code))
-                return False, None,[]
-        if downloadType=='Unsupported-Type':
-            print('The format is not supported yet.')
-            return False, None,[]
-        else:
-            with Loader("Download Started","Downloading Completed Successfully"):
-                files=self.here_we_download(download_list)
+                if mydict['status'] == 'redirect':
+                    download_list = [mydict['url']]
+                    print(download_list)
+                    downloadType = mydict['status']
+                elif mydict['status'] == 'picker':
+                    download_list = [obj['url']
+                                    for obj in mydict['picker']]
+                    downloadType = mydict['status']
+                with Loader("Getting Caption", "Caption Extracted ✅"):
+                    CAPTION = self.get_page_title(self.link)
+                with Loader(f"Downloading {len(download_list)} Files", f"Downloaded {len(download_list)} Files ✅"):
+                    files = self.here_we_download(download_list)
                 return downloadType, CAPTION, files
-            
+            else:
+                print("\nAPI responded failure: " +
+                        str(response.status_code))
+                return False, None, []
+        except Exception as e:
+            print(e)
+            return False, None, []
+                        
+                        
+# url = "https://www.instagram.com/reels/CufCAL1p7Ub/"  # reels
+# url = "https://www.instagram.com/reel/Cs1afZSr_Ci/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=="  # reel
+# url = "https://www.instagram.com/p/CwRX29MI0Hq/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=="  # post, sigle
+# url = "https://www.instagram.com/p/CrveD1XPau5/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=="  # carousel
+# url = "https://www.instagram.com/p/Cg9BeutMPm3URpBNFVyH1c_et4C3Mm_IDXv1V40/?img_index=1"
+# url = 'https://www.instagram.com/stories/evaaa.g__/3174965177308244912/'
 
-
-
-# link = 'https://www.instagram.com/p/CuXWxYkPx19/'
-# link ='https://www.instagram.com/reel/CvKawUbPRgn/?utm_source=ig_web_copy_link'
-# link='https://www.instagram.com/p/Cvt1onCOXSk/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=='
-# link = 'https://www.instagram.com/stories/evaaa.g__/3164772748186767392/'
-# ig_downloader = ig_dlp(link)
-# # caption, files = ig_downloader.download()
-# # print("Caption:", caption)
-# # print("Files:", files)
-# status,Cap,files=ig_downloader.download()
-# print(status)
-# print(Cap)
-# print(files)
+# instance = ig_dlp(url)
+# check, caption, filelist = instance.download()
+# print(check)
+# print(caption)
+# print(filelist)

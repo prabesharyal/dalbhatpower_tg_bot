@@ -1,4 +1,4 @@
-# **/**/*.env
+**/**/*.env
 **/**/*.session
 .env
 **/**/__pycache__

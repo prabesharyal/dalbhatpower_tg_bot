@@ -42,7 +42,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     \t`/video link` - _Downloads and send videos(1080p) upto 2 GB_
     \t`/audio link` - _Downloads and send audios(mp3) upto 2 GB_
 \n
-    \t`/ig link` - _Downloads and send instagram posts/reels/stories_\n\n
+    \t`/ig link` - _Downloads and send instagram posts/reels/_\n\n
 \t\t**Isn't this help enough ???**
 '''
     # await context.bot.send_message(chat_id=update.message.chat.id, text=helptext,parse_mode='MARKDOWN')
