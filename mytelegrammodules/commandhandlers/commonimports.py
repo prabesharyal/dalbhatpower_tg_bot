@@ -46,6 +46,8 @@ from NEPAL.NEPSE.nepse import NepalStock
 from downloader.audio_video_downloader import theOPDownloader
 from downloader.instagram import *
 
+from utils.vid_aud_metadata import *
+
 
 # ---------------------------------------------------------------- #
 # **************************************************************** #
