@@ -79,7 +79,7 @@ class NepaliRashiFal():
                 return -2
     
     def get_horoscope(tapaiko_rashi):
-        if tapaiko_rashi.lower() == 'dilasha' or tapaiko_rashi.lower() == 'dilase' or tapaiko_rashi.lower() == 'dilashe' or tapaiko_rashi.lower() == 'dilse' or tapaiko_rashi.lower() == 'dils':
+        if tapaiko_rashi.lower()=='ganesh' or tapaiko_rashi.lower() == 'samisha' or tapaiko_rashi.lower() == 'gunace' or tapaiko_rashi.lower() == 'jayant' or tapaiko_rashi.lower() == 'admin' or tapaiko_rashi.lower() == 'dilasha' or tapaiko_rashi.lower() == 'dilase' or tapaiko_rashi.lower() == 'dilashe' or tapaiko_rashi.lower() == 'dilse' or tapaiko_rashi.lower() == 'dils':
             return "Dilasha", 8000
         rashi_index=NepaliRashiFal.get_index(tapaiko_rashi)
         if rashi_index >=0 and rashi_index <= 11:

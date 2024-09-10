@@ -1,4 +1,7 @@
 import re
+import random
+import requests
+import string
 import asyncio
 import httpx
 import re
@@ -19,6 +22,9 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from rich.console import Console
+from rich.progress import Progress
+# Initialize rich console
+console = Console()
 
 
 class url_to_media_ID(object):
@@ -195,6 +201,13 @@ async def initiate_ig_picuki(link):
         return 'post_not_found'
     return json
 
+def generate_random_string(length=16):
+    # Define the characters to choose from: uppercase, lowercase letters, and digits
+    characters = string.ascii_letters + string.digits
+    # Generate a random string of the specified length
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
 
 class ig_dlp(object):
     """An Instagram Downloader Module You Can't Ignore
@@ -231,109 +244,47 @@ class ig_dlp(object):
                 continue
         return False
 
-    def get_valid_filename(self, url: str) -> Union[None, str]:
-        """noway for getting pretty filename, bcs one post have multiple media.
-        it's skipped if url doesn't match.
-
-        :param str url: raw content url.
-        :return str: _description_
-        """
-        if basename := re.search(r"^https?\:\/\/[^<]+\/q\/(?P<filename>[^\"].*?)\|\|", url):
-            basename = list(basename.groupdict().get("filename")[:25])
-            random.shuffle(basename)
-            return "".join(basename)
-
-        print(f"ValueError: Cannot find spesific name from url: {url}, skipped!")
-        return None
-
-    async def download_media(self, url) -> None:
-        """content downloader -
-        it will create new folder based suplied username or as default `picuki_media`.
-
-        :kwrags.url: str: target url.
-        :kwargs.username: str/optional: username for create new folder.
-        :kwargs.type: str: the type media want to downloaded.
-        """
-        urlContent = url
-        assert urlContent is not None, "stopped, nothing url to download!"
-
-        output = os.path.join(os.getcwd(), "downloads")
-
-        """
-        create new folder based media type.
-        """
-        if not os.path.exists(output):
-            os.mkdir(output)
-            # print(f"New folder created in: {output}")
-
-        filename = os.path.join(f"{output}/", self.get_valid_filename(urlContent))
-        if not filename:
-            return filename
-
-        """there's no best way to check file alredy downloaded or not, 
-        cause filename always generated randomly. 
-        """
-        async with ClientSession(
-            headers={
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-            }
-        ) as session:
-            async with session.get(urlContent) as response:
-                """
-                no extname in url, stoped if cannot find it on headers.
-                """
-                extension = response.headers.get("Content-Type")
-                if not extension:
-                    print(
-                        f"{col.RED}ValueError: Cannot get mimetype of content: {urlContent}{col.RESET}"
-                    )
-                    return
-
-                filename = "{}.{}".format(filename, extension.split("/")[-1])
-                currentLength = int(response.headers.get("content-length", 0))
-                if downloaded := await self.compareLength(
-                    os.path.dirname(filename), currentLength
-                ):
-                    print(
-                        f"Skip:: {col.YELLOW}{os.path.basename(filename)}{col.RESET}, Already Downloaded! as {col.GREEN}{downloaded} {col.RESET}"
-                    )
-                    return filename
-                if not os.path.exists(filename):
-                    async with aiofiles.open(filename, "wb") as f:
-                        with Progress(
-                            SpinnerColumn(speed=1.5),
-                            TextColumn("[green] Downloading..", justify="right"),
-                            BarColumn(),
-                            "[progress.percentage]{task.percentage:>3.0f}%",
-                            DownloadColumn(binary_units=False),
-                            TransferSpeedColumn(),
-                            TimeRemainingColumn(),
-                            console=Console(),
-                            transient=True,
-                        ) as progress:
-                            task = progress.add_task(
-                                "[green] Downloading..", total=currentLength
-                            )
-                            async for content in response.content.iter_chunks():
-                                await f.write(content[0])
-                                progress.update(task, advance=len(content[0]))
-                            await f.close()
-                            progress.stop()
-                    Console().print(f"[reset]", end="")
-                    Console().print(f"[green] Completed..saved as: [blue]{filename}[reset]")
-                else:
-                    Console().print(f"[reset]",end='')
-                    Console().print(
-                    f"[green] Skipping.. [blue]{filename} [green] file exist![reset]"
-                )
-        return filename
-
-
+    def download_media(self, link):
+        # url = link
+        output_dir = os.path.join(os.getcwd(), "downloads")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        extension = link.split('.')[-1]
+        typeof = extension
+        filename = generate_random_string()+'.'+extension
+        local_filename = os.path.join(output_dir,filename)
+        print(local_filename)
+        try:
+            console.clear()
+            console.print(
+                f"Downloading {typeof} {filename}...", style="bold blue"
+            )
+            with requests.get(link, stream=True) as r:
+                r.raise_for_status()
+                total_size = int(r.headers.get("content-length", 0))
+                with open(local_filename, "wb") as f:
+                    console.clear()
+                    with Progress() as progress:
+                        task = progress.add_task(
+                            "[cyan]Downloading...", total=total_size
+                        )
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                            progress.update(task, advance=len(chunk))
+            console.print(
+                f"{typeof} {filename} downloaded successfully.",
+                style="bold green",
+            )
+            return local_filename
+        except requests.RequestException as e:
+            console.print(f"Download error: {e}", style="bold red")
+            return False
+    
     async def here_we_download(self, all_links):
         filepath = []
         for media_link in all_links:
-            file = await self.download_media(media_link)
-            if os.path.getsize(file) != 0:
+            file = self.download_media(media_link)
+            if os.path.getsize(file) != False:
                 filepath.append(file)
             else:
                 os.remove(file)
@@ -391,14 +342,12 @@ class ig_dlp(object):
                 else:
                     tags = '@dalbhatpowerbot'
                 CAPTION = self.generate_caption(username,upload_time,just_desc,tags)
-                print(download_list)
+                # print(download_list)
                 downloaded = []
-                
                 if len(download_list) >= 1:
                     with console.status(f"[yellow]Downloading {len(download_list)} Items") as status:
                         downloaded += await self.here_we_download(download_list)
                     print(f"Downloaded {len(downloaded)} Items✅")
-                    print(downloaded)
                 else:
                     return False, None, []
                 # if len(videos) >= 1:

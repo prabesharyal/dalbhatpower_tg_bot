@@ -5,20 +5,16 @@ import re
 from typing import Union, Dict, Tuple, Any
 from bs4 import BeautifulSoup
 import os
-import aiofiles
-import random
-from aiohttp import ClientSession
-from colorama.ansi import Fore as col
-from rich.progress import (
-    Progress,
-    SpinnerColumn,
-    BarColumn,
-    TextColumn,
-    DownloadColumn,
-    TransferSpeedColumn,
-    TimeRemainingColumn,
-)
+import random, string
 from rich.console import Console
+
+
+def generate_random_string(length=16):
+    # Define the characters to choose from: uppercase, lowercase letters, and digits
+    characters = string.ascii_letters + string.digits
+    # Generate a random string of the specified length
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
 
 
 class url_to_media_ID(object):
@@ -184,15 +180,18 @@ async def get_media_content(media_id: str) -> Union[Dict[str, Any], None]:
 # url = "https://www.instagram.com/reel/C7ndJLFywBS/?igsh=MTRvNHI0ejh6bTRnYg=="
 # media_id = url_to_media_ID(url).extract_instagram_media_id()
 # print(f"Extracted Media ID: {media_id}")
-
+COOKIES = {
+        "domain": "www.picuki.com",
+        "value": "CQAdTsAQAdTsAF7ADBENA4EsAP_gAEPgAAYgKQNV9H__bW1r8H73aftkeYVP91j77sQhBhPJE-4FzLvW_IwXx2ExNA36tqIKmRIEsXZBIQNlHBBUTVCgaogVryDIakGcoTNKJaBECFMRO2ZYCB5vmwtj-QKY5Pr903cx2D-p_dv8zdziz4VHm3a59mO0WJCdA58tDfv8bRKb-9IGZ_50v4v0_EfrA2_eT1l_tcup5B9-ctM7eXW-9_efd79Ll86kBBR8Asg0KiAOsCQkINAwggQAqCsICKBAAAAAQNEBACYMCnYGAS6wkQAgBQADBACAAFCQAIAAAIAEIgAgAKBAABAIFAAAABAMBAAQIAAIALAQCAAEB0CFMCCBQLABIyAiFMCEKBIICWSoQSAIEFUIQihwAIBETBQAAAAAFQAAALBYGEEgIUJBAlxBtAAAQAIBBABEAJODAAEARolQeDJtGVpAGhpwFAwAAAAA.YAAAAAAAAAAA",
+    }
 
 async def initiate_ig_picuki(link):
     media_id = url_to_media_ID(link).extract_instagram_media_id()
     if media_id == False:
-        return 'invalid_url'
+        return "invalid_url"
     json = await get_media_content(media_id)
     if json == None:
-        return 'post_not_found'
+        return "post_not_found"
     return json
 
 
@@ -206,7 +205,9 @@ class ig_dlp(object):
     def __init__(self, link) -> None:
         self.link = link
 
-    async def compareLength(self, targetDir: str, currentLength: int) -> Union[str, bool]:
+    async def compareLength(
+        self, targetDir: str, currentLength: int
+    ) -> Union[str, bool]:
         """compare content length before iterate chunk to check alrdy downloaded or not.
         in general, different file size == different content.
 
@@ -238,7 +239,9 @@ class ig_dlp(object):
         :param str url: raw content url.
         :return str: _description_
         """
-        if basename := re.search(r"^https?\:\/\/[^<]+\/q\/(?P<filename>[^\"].*?)\|\|", url):
+        if basename := re.search(
+            r"^https?\:\/\/[^<]+\/q\/(?P<filename>[^\"].*?)\|\|", url
+        ):
             basename = list(basename.groupdict().get("filename")[:25])
             random.shuffle(basename)
             return "".join(basename)
@@ -246,130 +249,86 @@ class ig_dlp(object):
         print(f"ValueError: Cannot find spesific name from url: {url}, skipped!")
         return None
 
-    async def download_media(self, url) -> None:
-        """content downloader -
-        it will create new folder based suplied username or as default `picuki_media`.
+    async def download_media(self, link):
+        output_dir = os.path.join(os.getcwd(), "downloads")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
-        :kwrags.url: str: target url.
-        :kwargs.username: str/optional: username for create new folder.
-        :kwargs.type: str: the type media want to downloaded.
-        """
-        urlContent = url
-        assert urlContent is not None, "stopped, nothing url to download!"
+        extension = link.split(".")[-1]
+        filename = generate_random_string() + "." + extension
+        filepath = os.path.join(output_dir, filename)
 
-        output = os.path.join(os.getcwd(), "downloads")
-
-        """
-        create new folder based media type.
-        """
-        if not os.path.exists(output):
-            os.mkdir(output)
-            # print(f"New folder created in: {output}")
-
-        filename = os.path.join(f"{output}/", self.get_valid_filename(urlContent))
-        if not filename:
-            return filename
-
-        """there's no best way to check file alredy downloaded or not, 
-        cause filename always generated randomly. 
-        """
-        async with ClientSession(
-            headers={
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-            }
-        ) as session:
-            async with session.get(urlContent) as response:
-                """
-                no extname in url, stoped if cannot find it on headers.
-                """
-                extension = response.headers.get("Content-Type")
-                if not extension:
-                    print(
-                        f"{col.RED}ValueError: Cannot get mimetype of content: {urlContent}{col.RESET}"
-                    )
-                    return
-
-                filename = "{}.{}".format(filename, extension.split("/")[-1])
-                currentLength = int(response.headers.get("content-length", 0))
-                if downloaded := await self.compareLength(
-                    os.path.dirname(filename), currentLength
-                ):
-                    print(
-                        f"Skip:: {col.YELLOW}{os.path.basename(filename)}{col.RESET}, Already Downloaded! as {col.GREEN}{downloaded} {col.RESET}"
-                    )
-                    return filename
-                if not os.path.exists(filename):
-                    async with aiofiles.open(filename, "wb") as f:
-                        with Progress(
-                            SpinnerColumn(speed=1.5),
-                            TextColumn("[green] Downloading..", justify="right"),
-                            BarColumn(),
-                            "[progress.percentage]{task.percentage:>3.0f}%",
-                            DownloadColumn(binary_units=False),
-                            TransferSpeedColumn(),
-                            TimeRemainingColumn(),
-                            console=Console(),
-                            transient=True,
-                        ) as progress:
-                            task = progress.add_task(
-                                "[green] Downloading..", total=currentLength
-                            )
-                            async for content in response.content.iter_chunks():
-                                await f.write(content[0])
-                                progress.update(task, advance=len(content[0]))
-                            await f.close()
-                            progress.stop()
-                    Console().print(f"[reset]", end="")
-                    Console().print(f"[green] Completed..saved as: [blue]{filename}[reset]")
+        headers = {
+            "Referer": "https://www.picuki.com/",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        }
+        async with httpx.AsyncClient() as client:
+            try:
+                resp = await client.get(link, headers=headers, cookies=COOKIES,timeout=None, follow_redirects=True)
+                # print("error xiana")
+                if resp.status_code == 200:
+                    with open(filepath, "wb") as file:
+                        for chunk in resp.iter_bytes():
+                            if chunk:
+                                file.write(chunk)
+                    # print(f"Downloaded: {filepath}")
                 else:
-                    Console().print(f"[reset]",end='')
-                    Console().print(
-                    f"[green] Skipping.. [blue]{filename} [green] file exist![reset]"
-                )
-        return filename
-
+                    print(f"Failed to download media: {resp.status_code}")
+                    # with open("link.txt", "w") as link_file:
+                    #     link_file.write(link)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                # with open("link.txt", "w") as link_file:
+                #     link_file.write(link)
+        return filepath
 
     async def here_we_download(self, all_links):
         filepath = []
         for media_link in all_links:
             file = await self.download_media(media_link)
-            if os.path.getsize(file) != 0:
-                filepath.append(file)
-            else:
-                os.remove(file)
+            if os.path.exists(file):
+                if os.path.getsize(file) != 0:
+                    filepath.append(file)
+                else:
+                    os.remove(file)
         return filepath
 
     def generate_caption(self, username, upload_time, just_desc, tags):
         # Initial caption creation
         caption = f"{username} | {upload_time} \n\n {'✨' if '</div>' in just_desc else just_desc} \n\n {tags}"
-        
+
         # Check if the initial length is within the limit
         if len(caption) <= 1900:
             return caption
-        
+
         # If the caption is too long, start removing unnecessary parts
         # Step 1: Try removing tags
         caption = f"{username} | {upload_time} \n\n {'✨' if '</div>' in just_desc else just_desc}"
-        
+
         # Check if the length is now within the limit
         if len(caption) <= 1900:
             return caption
-        
+
         # Step 2: Try removing username and upload_time
         caption = f"{'✨' if '</div>' in just_desc else just_desc}"
-        
+
         # Check if the length is now within the limit
         if len(caption) <= 1900:
             return caption
-        
+
         # Step 3: Trim the description to fit within the limit, ensuring some context is preserved
         max_desc_length = 1900 - len("... @dalbhatpowerbot")
-        trimmed_desc = just_desc[:max_desc_length // 2] + "..." + just_desc[-max_desc_length // 2:]
-        
+        trimmed_desc = (
+            just_desc[: max_desc_length // 2]
+            + "..."
+            + just_desc[-max_desc_length // 2 :]
+        )
+
         caption = f"{trimmed_desc} \n\n@dalbhatpowerbot"
-        
+
         return caption
-    
+
     async def download(self):
         try:
             console = Console()
@@ -379,26 +338,28 @@ class ig_dlp(object):
             #     mydict = initiate_ig_picuki(url)
             # print(mydict)
             if mydict != "invalid_url" and mydict != "post_not_found":
-                videos = [item["url"] for item in mydict["media"]["videos"] if "url" in item]
-                photos = mydict['media']['images']
+                videos = [
+                    item["url"] for item in mydict["media"]["videos"] if "url" in item
+                ]
+                photos = mydict["media"]["images"]
                 download_list = set(photos)
                 download_list = list(download_list.union(set(videos)))
-                username = mydict['name']
-                upload_time = mydict['time']
-                just_desc = mydict['caption']
-                if 'tags' in mydict:
+                username = mydict["name"]
+                upload_time = mydict["time"]
+                just_desc = mydict["caption"]
+                if "tags" in mydict:
                     tags = "#" + " #".join(mydict["tags"].split(", "))
                 else:
-                    tags = '@dalbhatpowerbot'
-                CAPTION = self.generate_caption(username,upload_time,just_desc,tags)
-                print(download_list)
+                    tags = "@dalbhatpowerbot"
+                CAPTION = self.generate_caption(username, upload_time, just_desc, tags)
+                # print(download_list)
                 downloaded = []
-                
                 if len(download_list) >= 1:
-                    with console.status(f"[yellow]Downloading {len(download_list)} Items") as status:
+                    with console.status(
+                        f"[yellow]Downloading {len(download_list)} Items"
+                    ) as status:
                         downloaded += await self.here_we_download(download_list)
                     print(f"Downloaded {len(downloaded)} Items✅")
-                    print(downloaded)
                 else:
                     return False, None, []
                 # if len(videos) >= 1:
@@ -413,14 +374,15 @@ class ig_dlp(object):
                 #         f"Downloaded {len(photos)} Images ✅",
                 #     ):
                 #         downloaded += self.here_we_download("image", photos)
-                if len(downloaded)<1:
+                if len(downloaded) < 1:
                     return False, None, []
-                return 'post', CAPTION, downloaded
-            else: 
+                return "post", CAPTION, downloaded
+            else:
                 Console.print(f"[red] API Response: [blue]{mydict} [reset]")
                 return False, None, []
         except Exception as e:
-            print('ig_dlp main Exception'+ str(e))
+            print("ig_dlp main Exception")
+            print(e)
             return False, None, []
 
 
@@ -435,8 +397,13 @@ class ig_dlp(object):
 
 # url = "https://www.instagram.com/p/asasda/?utm_source=ig_web_copy_link" #fake
 
-# instance = ig_dlp(url)
-# check, caption, filelist = instance.download()
-# print(check)
-# print(caption)
-# print(filelist)
+# url = "https://www.instagram.com/reel/C4LWOf7p83L/?igsh=MTIyOThuOXJ5YjUxeQ=="
+# async def main():
+#     instance = ig_dlp(url)
+#     check, caption, filelist = await instance.download()
+#     print(check)
+#     print(caption)
+#     print(filelist)
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
