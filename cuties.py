@@ -1,34 +1,12 @@
-from mytelegrammodules.commandhandlers.commonimports import *
-from downloader.instagram import ig_dlp
-from downloader.insta_story import rapid_ig
+from telegram import Update, InputFile
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
 
-from utils.loader import Loader
-
-
-def convert_html(string):
-    string = string.replace('<', '&lt')
-    string = string.replace('>', '&gt')
-    return string
-
-
-def media_group_splitter(input_list):
-    if len(input_list) <= 10:
-        return [input_list]
-
-    num_parts = len(input_list) // 10
-    remainder = len(input_list) % 10
-
-    parts = []
-    start = 0
-    for _ in range(num_parts):
-        end = start + 10
-        parts.append(input_list[start:end])
-        start = end
-
-    if remainder > 0:
-        parts.append(input_list[-remainder:])
-
-    return parts
+# Function to process links - you will handle the implementation of this
+def process_link(link):
+    # This function should return a tuple: (status, caption, file_path_list)
+    # Example:
+    # return ("success", "Here's your file!", ["/path/to/file1", "/path/to/file2"])
+    pass
 
 async def send_and_all(update, context, check, caption, filelist, url):
     if check != False:
@@ -107,79 +85,39 @@ async def send_and_all(update, context, check, caption, filelist, url):
                         await context.bot.send_media_group(chat_id=update.effective_chat.id, media=media_chunks, write_timeout=1000, connect_timeout=1000, read_timeout=1000)
                     time.sleep(2)
 
-async def rapid_ig_dl(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # fullurlregex = r'(https?:\/\/(?:(www|m)\.)?instagram\.com\/(p|reel)\/([^/?#&\s]+))' 
-    print("This is RapidAPI Mode")
-    json = update.message.from_user
-    # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
-    print((str(json['first_name']) +' ' +str(json['last_name'])+' : ' +str(json['id']))+" - Sent Insta Link : " + update.message.text)
-    shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
-    try:
-        # only_necesssary_regex = r'((instagram\.com\/(p|reel|reels)\/([\w\-]+))|(instagram\.com\/(stories)\/([\w\-\.]+)\/([\d]+)\/))'
-        only_necesssary_regex = r'(instagram\.com\/(p|reel|reels|stories)\/([\w\-]+)(\/[\d]+)?)'
-        links= re.findall(only_necesssary_regex,update.message.text)
-        if len(links) == 0:
-            toreply = 'Please send a Proper Instagram Post Or Reels Link\n\tNote : Profiles and Highlights are not yet Supported_'
-            await update.message.reply_markdown(toreply, reply_markup=ReplyKeyboardRemove(selective=True))
-            return 'Done'
-        else :
-            for link in links:
-                url = "https://"+link[0]
-                check,caption,filelist  = rapid_ig(url).download()
-                await send_and_all(update, context, check, caption, filelist, url)
-        shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
-    except Exception as e:
-        print(e)
-        shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
-    print('%50s'%"Done")
 
+# Function to forward photos and videos
+async def forward_media(update: Update, context: CallbackContext):
+    target_chat_id = 'nepalibeauties'  # Replace with the target chat ID (owner's chat)
 
-async def instagram_dl(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # fullurlregex = r'(https?:\/\/(?:(www|m)\.)?instagram\.com\/(p|reel)\/([^/?#&\s]+))'
-    json = update.message.from_user
-    # {'is_bot': False, 'username': 'sads', 'first_name': 'assad', 'last_name': 'asd', 'id': 23423234, 'language_code': 'en'}
-    print((str(json['first_name']) + ' ' + str(json['last_name'])+' : ' +
-          str(json['id']))+" - Sent Insta Link : " + update.message.text)
-    shutil.rmtree(os.path.join(os.getcwd(), 'downloads'), ignore_errors=True)
-    try:
-        if re.search(r'instagram\.com\/(stories)\/([\w\.\_\-]+)\/([\d]+)(\/)?(\?)?.*',update.message.text):
-            # toreply = '*Sorry for Inconvenience*, Stories are not supported for now.'
-            # await update.message.reply_text(toreply, reply_markup=ReplyKeyboardRemove(selective=True), parse_mode='Markdown')
-            # print("Story Link, So Sent Sorry message.")
-            await rapid_ig_dl(update, context)
-            return 'Done'
+    if update.message.photo:
+        await context.bot.send_photo(chat_id=target_chat_id, photo=update.message.photo[-1].file_id, caption=update.message.caption)
+    
+    elif update.message.video:
+        await context.bot.send_video(chat_id=target_chat_id, video=update.message.video.file_id, caption=update.message.caption)
+    
+    elif update.message.text:
+        if "http" in update.message.text:
+            status, caption, file_path_list = process_link(update.message.text)
+            if status == "success":
+                for file_path in file_path_list:
+                    await context.bot.send_document(chat_id=target_chat_id, document=open(file_path, 'rb'), caption=caption)
 
-            
-        only_necesssary_regex = r'(instagram\.com\/(p|reel|reels)\/([\w\-]+))'
-        links = re.findall(only_necesssary_regex, update.message.text)
+# Start command
+async def start(update: Update, context: CallbackContext):
+    update.message.reply_text("I'm a forwarding bot! Send me photos, videos, or links, and I'll forward them.")
 
-        if len(links) == 0:
-            toreply = 'Please send a Proper Instagram Post Or Reels Link\n\tNote : Profiles and Highlights are not yet Supported_'
-            await update.message.reply_markdown(toreply, reply_markup=ReplyKeyboardRemove(selective=True))
-            return 'Done'
-        else:
-            for link in links:
-                url = "https://"+link[0]
-                # print(url)
-                check, caption, filelist = await ig_dlp(url).download()
-                # check, caption, filelist = ig_dlp(url).download()
-                # print(filelist)
-                time.sleep(5)
-                # print(caption)
+def main():
+    token = '6902521433:AAGz26Do-zYaRrfW_yCjGTCTpmOsHw5syQI'  # Replace with your bot's token
+    updater = Updater(token, use_context=True)
+    
+    dp = updater.dispatcher
+    
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(MessageHandler(Filters.photo | Filters.video | Filters.text, forward_media))
+    
+    updater.start_polling()
+    updater.idle()
 
-                # if os.path.exists(filelist[0]):
-                #     print("File exists")
-                # else:
-                #     print("File doesn't exist")
-                await send_and_all(update, context, check, caption, filelist, url)
-                time.sleep(2)
-                # os.remove(s for s in filelist)
-        shutil.rmtree(os.path.join(os.getcwd(), 'downloads'),
-                      ignore_errors=True)
-    except Exception as e:
-        print(e)
-        shutil.rmtree(os.path.join(os.getcwd(), 'downloads'),
-                      ignore_errors=True)
-    print('%50s' % "Done")
-
-
+if __name__ == '__main__':
+    main()

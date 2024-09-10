@@ -18,8 +18,15 @@ update = """‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ 
  This is to inform you that we've pushed some updates to the bot. 
  
  ‎ ‎ ‎ ‎ ‎ ‎ ‎***Changelogs:***
-\t - Added Tiktok Photo Group Posts Downloader
  
+\t - Fixed Facebook Downloader
+\t - Never Failing Twitter/X Downloader
+\t - Added Reddit Downloader
+\t - Added Terabox Support
+\t - Fixed Instagram Issues
+\t - Removed unused features
+\t - Added Gotra Finder
+
  \n\n Maintenance of bot is costly. If you want to support us you can always do it [here](https://www.buymeacoffee.com/prabesharyal). \n\n Thank You For Your Support🙏!"""
 
 # update = """‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ ‎ ‎ ‎__(NEW UPDATE!!)__

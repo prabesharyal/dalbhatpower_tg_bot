@@ -19,6 +19,7 @@ import time, datetime,nepali_datetime
 #Import Telegram Features
 from telegram import InputMediaAudio, InputMediaVideo, InputMediaPhoto, Update, ReplyKeyboardRemove,InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, Updater, InlineQueryHandler
+from telegram.constants import ParseMode
 
 
 # import loader

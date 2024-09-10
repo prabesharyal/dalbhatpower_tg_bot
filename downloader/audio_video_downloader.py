@@ -34,12 +34,13 @@ class theOPDownloader():
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
                     }],
-                'trim_file_name' : 25,
-                # 'restrictfilenames': True,
+                'trim_file_name' : 100,
+                'restrictfilenames': False,
                 'ignoreerrors': True,
                 'no_warnings':True, 
                 'quiet': True,
                 'outtmpl': 'downloads/%(title)s.%(ext)s',
+                'cookiefile': 'cookies/youtube_cookies.txt',
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link,download=True)   
@@ -74,6 +75,7 @@ class theOPDownloader():
                 'no_warnings':True, 
                 'quiet': True,
                 'outtmpl': 'downloads/%(title)s.%(ext)s',
+                'cookiefile': 'cookies/youtube_cookies.txt',
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link,download=True)   
@@ -128,7 +130,7 @@ class theOPDownloader():
                         'restrictfilenames': True,
                         'outtmpl': 'downloads/%(title)s.%(ext)s',
                         'format' : 'mp4',
-                        "cookiefile": "cookies/ig_cookies.txt",
+                        'cookiefile': 'cookies/youtube_cookies.txt',
                         }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link, download=True)
