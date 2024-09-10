@@ -1,7 +1,0 @@
-**/**/*.env
-**/**/*.session
-.env
-**/**/__pycache__
-**/**/downloads
-**/**/test**
-/mytelegrammodules/database/db.json
