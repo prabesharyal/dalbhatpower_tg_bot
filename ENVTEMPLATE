@@ -1,0 +1,15 @@
+#  Telegram BOT Token
+TG_BOT_TOKEN=
+
+# Telegarm Client/APP Token
+TG_APP_API_ID=
+TG_APP_API_HASH=
+# TG_APP_TITLE =
+TG_APP_SHORT_NAME=
+TG_APP_CHAT_ID=
+
+#hamropatro
+RASIFAL=https://keyvalue.hamropatro.com/kv/get/horoscope_daily::-1?v=2
+NEPSE=https://nepalstock.onrender.com/
+
+X_RapidAPI_Key=
