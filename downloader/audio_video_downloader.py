@@ -74,7 +74,6 @@ class theOPDownloader():
                 'no_warnings':True, 
                 'quiet': True,
                 'outtmpl': 'downloads/%(title)s.%(ext)s',
-                '':''
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link,download=True)   

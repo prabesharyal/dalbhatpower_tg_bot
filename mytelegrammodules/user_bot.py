@@ -86,7 +86,7 @@ class TelethonModuleByME():
                     video_file_path,
                     attributes=attributes,
                     supports_streaming=True,
-                    thumb=video_thumbnail_path,
+                    thumbnail=video_thumbnail_path,
                     # extra=extra_metadata,
                     progress_callback=lambda current, total: TelethonModuleByME.callback(current, total, context, message, title, video_file_path,message_text, typee='Video')
                 )

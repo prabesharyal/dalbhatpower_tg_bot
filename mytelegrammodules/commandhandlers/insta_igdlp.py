@@ -1,29 +1,6 @@
-import os, re, sys, json, ast, shutil
-import requests
-import contextlib
-
-from telegram import (
-    InputMediaAudio,
-    InputMediaVideo,
-    InputMediaPhoto,
-    Update,
-    ReplyKeyboardRemove,
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-)
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    ContextTypes,
-    MessageHandler,
-    filters,
-    Updater,
-    InlineQueryHandler,
-)
-
-
-from instagram import ig_dlp
-from insta_story import rapid_ig
+from mytelegrammodules.commandhandlers.commonimports import *
+from downloader.instagram import ig_dlp
+from downloader.insta_story import rapid_ig
 
 from utils.loader import Loader
 
@@ -58,6 +35,12 @@ async def send_and_all(update, context, check, caption, filelist, url):
     if check != False:
         cap = convert_html(caption)
         CAPTION = '<a href="' + url + '">' + cap + "</a>"
+        total_caption_length = len(CAPTION)
+        CAPTION = (
+            '<a href="' + url + '">' + cap[:(len(cap)-(total_caption_length-1024)+3)] + "..." + "</a>"
+            if len(CAPTION) > 1023
+            else CAPTION
+        )
         if len(filelist) == 1:
             filename = filelist[0]
             if filename.endswith(("mp4", "webm")):
@@ -78,8 +61,8 @@ async def send_and_all(update, context, check, caption, filelist, url):
                         duration=video_duration,
                         caption=CAPTION,
                         disable_notification=True,
-                        width=video_dimensions["width"],
-                        height=video_dimensions["height"],
+                        width=video_dimensions.get("width", 0),
+                        height=video_dimensions.get("height", 0),
                         thumb=open(video_thumbnail_path, "rb"),
                         parse_mode="HTML",
                         supports_streaming=True,
