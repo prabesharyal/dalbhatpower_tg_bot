@@ -12,6 +12,7 @@ class ig_dlp(object):
         # self.link = link
         self.method = 'cobalt'
         self.link = link
+        print(link)
         if self.method == 'cobalt':
             self.headers = {
                 "content-type": "application/json",
@@ -72,8 +73,7 @@ class ig_dlp(object):
     def download(self):
         try:
             with Loader("Requesting API....", "API Response Received✅"):
-                response = requests.post(
-                    self.api, headers=self.headers, data=json.dumps(self.body))
+                response = requests.post(self.api, headers=self.headers, data=json.dumps(self.body))
                 mydict = response.json()
             if response.status_code == 200:
                 if mydict['status'] == 'redirect':
@@ -86,6 +86,7 @@ class ig_dlp(object):
                     downloadType = mydict['status']
                 with Loader("Getting Caption", "Caption Extracted ✅"):
                     CAPTION = self.get_page_title(self.link)
+                    CAPTION = CAPTION if len(CAPTION)<1024 else CAPTION[:1020]+"..."
                 with Loader(f"Downloading {len(download_list)} Files", f"Downloaded {len(download_list)} Files ✅"):
                     files = self.here_we_download(download_list)
                 return downloadType, CAPTION, files
@@ -105,7 +106,7 @@ class ig_dlp(object):
 # url = "https://www.instagram.com/p/Cg9BeutMPm3URpBNFVyH1c_et4C3Mm_IDXv1V40/?img_index=1"
 # url = 'https://www.instagram.com/stories/evaaa.g__/3174965177308244912/'
 
-# instance = ig_dlp(url)
+# # instance = ig_dlp(url)
 # check, caption, filelist = instance.download()
 # print(check)
 # print(caption)

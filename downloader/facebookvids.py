@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 
 def fb_to_cdn(link):
-    url = 'http://161.35.188.43:5000'
+    url = 'http://164.92.77.99:5000'
     params = {'url': link}
     response = requests.get(url, params=params)
     return response.json()

@@ -48,7 +48,7 @@ async def tweet_dl(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                 with Loader("Uploading Tweet Short Video : ","Tweeet Short Video Upload Success"):
                                     try:
                                         video_duration, video_dimensions, video_thumbnail_path = extract_media_info(filename, 'video')
-                                        await update.message.reply_video(video=open(filename, 'rb'),allow_sending_without_reply=True,duration=video_duration, caption=CAPTION, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumb=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
+                                        await update.message.reply_video(video=open(filename, 'rb'),allow_sending_without_reply=True,duration=video_duration, caption=CAPTION, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumbnail=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
                                     except Exception as e:
                                         print(e)
                                 await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="cancel")

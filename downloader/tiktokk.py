@@ -1,6 +1,6 @@
-import requests, re, json, os
+import requests, json, os
 from utils.loader import Loader
-
+import yt_dlp
 
 class tt_dlp(object):
     """An Tiktok Downloader Module You Can't Ignore
@@ -30,13 +30,16 @@ class tt_dlp(object):
         title = Tiktok_Title_Extractor.title_extractor(url)
         return title
 
-    def download_media(self, url):
+    def download_media(self, url, typeofcontent):
         try:
-            response = requests.get(url)
+            response = requests.get(url, allow_redirects=True)
             response.raise_for_status()
+            # print(response)
 
-            filename = url.split("/")[-1].split("?")[0]
-            download_path = os.path.join("downloads", filename)
+            # filename = url.split("/")[-1].split("?")[0]
+            filename = filename = url.split("/")[-1].split("?")[0].split("~")[0] if typeofcontent == "picker" else url.split("/")[-1].split("?")[1].split("=")[2][:-2]
+            extension = ".mp4" if typeofcontent != "picker" else '.jpg'
+            download_path = os.path.join("downloads", filename + extension)
 
             # Create the 'downloads' directory if it doesn't exist
             os.makedirs("downloads", exist_ok=True)
@@ -49,10 +52,10 @@ class tt_dlp(object):
             print("Error:", e)
             raise FileNotFoundError
 
-    def here_we_download(self, all_links):
+    def here_we_download(self, all_links, typeofcontent):
         filepath = []
         for media_link in all_links:
-            file = self.download_media(media_link)
+            file = self.download_media(media_link, typeofcontent)
             filepath.append(file)
         return filepath
 
@@ -63,17 +66,13 @@ class tt_dlp(object):
                     self.api, headers=self.headers, data=json.dumps(self.body)
                 )
                 mydict = response.json()
+                typeofcontent = mydict["status"]
                 # print(mydict)
             if response.status_code == 200:
-                if mydict["status"] == "redirect" or "stream":
+                if typeofcontent == "redirect" or typeofcontent == "stream":
                     download_list = [mydict["url"]]
-                    # print(download_list)
-                    downloadType = mydict["status"]
-                elif mydict["status"] == "picker":
+                elif typeofcontent == "picker":
                     download_list = [obj["url"] for obj in mydict["picker"]]
-                    downloadType = mydict["status"]
-                    # print(download_list)
-
                 with Loader("Getting Caption", "Caption Extracted ✅"):
                     CAPTION = self.get_page_title(self.link)
 
@@ -81,8 +80,8 @@ class tt_dlp(object):
                     f"Downloading {len(download_list)} Files",
                     f"Downloaded {len(download_list)} Files ✅",
                 ):
-                    files = self.here_we_download(download_list)
-                return downloadType, CAPTION, files
+                    files = self.here_we_download(download_list, typeofcontent)
+                return typeofcontent, CAPTION, files
             else:
                 print("\nAPI responded failure: " + str(response.status_code))
                 return False, None, []
@@ -95,59 +94,18 @@ class tt_dlp(object):
 class Tiktok_Title_Extractor:
     """A Tiktok Title extraction Module"""
 
-    def title_extractor(url):
-        full_link = url
-        if full_link != 0:
-            from selenium import webdriver
-            from selenium.common.exceptions import NoSuchElementException
-            from selenium.webdriver.chrome.service import Service as ChromeService
-            from webdriver_manager.chrome import ChromeDriverManager
+    def title_extractor(link):
+        ydl_opts = {
+            "ignoreerrors": True,
+            "no_playlist": True,
+            "no_warnings": True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(link, download=False)
+            video_title = info["title"]
+            return video_title
 
-            options = webdriver.ChromeOptions()
-            options.add_experimental_option("excludeSwitches", ["enable-logging"])
-            # options.add_argument("--no-sandbox")
-            options.add_argument("--disable-gpu")
-            options.add_argument("window-size=1920x1080")  # Adjust the size as needed
-            options.add_argument(
-                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-            )
 
-            options.add_argument("--headless")
-            options.add_argument("--disable-features=NetworkService")
-            options.add_argument(
-                "--disable-web-security"
-            )  # Disable web security to prevent redirects
-            options.add_argument("--disable-javascript")  # Disable JavaScript execution
-
-            driver = webdriver.Chrome("chromedriver.exe")
-            # # driver = webdriver.Chrome(
-            # #     service=ChromeService(ChromeDriverManager().install()), options=options
-            # # )
-
-            driver.get(full_link)
-            webpage_title = driver.title
-            driver.implicitly_wait(5)
-            desc = driver.find_element_by_xpath(
-                '//*[@id="main-content-video_detail"]/div/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div/h1'
-            )
-            page_title = desc.text
-            # driver.implicitly_wait(5)
-            try:
-                heading = driver.find_element_by_xpath(
-                    '//*[@id="main-content-video_detail"]/div/div[2]/div/div[1]/div[2]/div[2]/h1'
-                )
-            except NoSuchElementException as e:
-                heading = None
-
-            # print("Page title:", page_title)
-            video_title = (
-                heading.text + "\n" + page_title if heading is not None else page_title
-            )
-            driver.quit()
-            return video_title if video_title else webpage_title
-        else:
-            print("Link is not working!")
-            return 0, 0
 
 
 ## Test Links

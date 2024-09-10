@@ -77,8 +77,10 @@ class NepaliRashiFal():
                 return (eng_index_return)
             else:
                 return -2
-
+    
     def get_horoscope(tapaiko_rashi):
+        if tapaiko_rashi.lower() == 'dilasha' or tapaiko_rashi.lower() == 'dilase' or tapaiko_rashi.lower() == 'dilashe' or tapaiko_rashi.lower() == 'dilse' or tapaiko_rashi.lower() == 'dils':
+            return "Dilasha", 8000
         rashi_index=NepaliRashiFal.get_index(tapaiko_rashi)
         if rashi_index >=0 and rashi_index <= 11:
             api_resp = requests.get(RASIFAL)
@@ -92,11 +94,11 @@ class NepaliRashiFal():
             राशि : ***{neededinfo['items'][rashi_index]['rashi']}***\n\nअक्षर : *{neededinfo['items'][rashi_index]['initials']}* \n
             \nराशिफल : {neededinfo['items'][rashi_index]['desc'] if rashi_index<11 else rashikofal}
             '''
-            return this_will_be_returned
+            return this_will_be_returned, rashi_index
         elif rashi_index == -1:
-            return "Please enter value in proper range [1-12]."
+            return "Please enter value in proper range [1-12].", 69
         elif rashi_index == -2:
-            return "No such horoscope exists."
+            return "No such horoscope exists.", 69
 
     def get_all_horoscope():
         api_resp = requests.get(RASIFAL)

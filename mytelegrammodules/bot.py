@@ -5,6 +5,7 @@ from mytelegrammodules.commandhandlers.nepcal import *
 from mytelegrammodules.commandhandlers.nepse import *
 from mytelegrammodules.commandhandlers.vidauddl import *
 from mytelegrammodules.commandhandlers.insta_igdlp import *
+from mytelegrammodules.commandhandlers.ttok_dlp import *
 from mytelegrammodules.commandhandlers.tweet_dl import *
 from mytelegrammodules.commandhandlers.facebook_dl import *
 from mytelegrammodules.commandhandlers.general_downloader import *
@@ -70,8 +71,8 @@ def main() -> None:
     application.add_handler(CommandHandler("nepse", nepse,block=False))
 
     #YTDLP
-    application.add_handler(CommandHandler("video", video, block=False))
-    application.add_handler(CommandHandler("audio", audio, block=False))
+    application.add_handler(CommandHandler("video", video, block=True))
+    application.add_handler(CommandHandler("audio", audio, block=True))
     
     #cobalt
     application.add_handler(CommandHandler("ig", instagram_dl, block=False))
@@ -92,10 +93,10 @@ def main() -> None:
     application.add_handler(CommandHandler("x", tweet_dl, block=False))
 
     # #facebook
-    application.add_handler(CommandHandler("fb", fbviddl, block=False))
-    application.add_handler(CommandHandler("facebook", fbviddl, block=False))
-    application.add_handler(CommandHandler("fbdl", fbviddl, block=False))
-    application.add_handler(CommandHandler("fbvid", fbviddl, block=False))
+    application.add_handler(CommandHandler("fb", fbviddl, block=True))
+    application.add_handler(CommandHandler("facebook", fbviddl, block=True))
+    application.add_handler(CommandHandler("fbdl", fbviddl, block=True))
+    application.add_handler(CommandHandler("fbvid", fbviddl, block=True))
 
     #Downloader
     application.add_handler(CommandHandler("download", file_dl, block=False))
@@ -109,10 +110,12 @@ def main() -> None:
 
     
     #For Short Video Links in Messages
-    application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download, block=False))
-    application.add_handler(MessageHandler(filters.Regex('(https?:\/\/(?:(www|m)\.)?instagram\.com\/(p|reel(s)?)\/([^/?#&\s]+))') & ~filters.COMMAND, instagram_dl, block=False))
+    # application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+|tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download, block=False))
+    application.add_handler(MessageHandler(filters.Regex('(?:https?://)?(?:(?:www|m)\.)?youtube\.com/shorts/[-a-zA-Z0-9]+') & ~filters.COMMAND, short_vid_download, block=True))
+    application.add_handler(MessageHandler(filters.Regex('(https?:\/\/(?:(www|m)\.)?instagram\.com\/(p|reel(s)?)\/([^/?#&\s]+))') & ~filters.COMMAND, instagram_dl, block=True))
     application.add_handler(MessageHandler(filters.Regex('(twitter|x|X)\.com\/\w+\/status\/\d+') & ~filters.COMMAND, tweet_dl, block=False))
-    application.add_handler(MessageHandler(filters.Regex('((https:\/\/)?(fb|www)?\.(facebook\.com|watch)\/[\w\/\.\?=\&]+)') & ~filters.COMMAND, fbviddl, block=False))
+    application.add_handler(MessageHandler(filters.Regex('((https:\/\/)?(fb|www)?\.(facebook\.com|watch)\/[\w\/\.\?=\&]+)') & ~filters.COMMAND, fbviddl, block=True))
+    application.add_handler(MessageHandler(filters.Regex(r'((https:\/\/)?(((www.)?tiktok\.com\/@[-a-z\.A-Z0-9_]+\/(video|photo)\/\d+)|(vt\.tiktok\.com\/[-a-zA-Z0-9]+)))') & ~filters.COMMAND, tiktok_dl, block=True))
 
     
     # application.add_handler(MessageHandler(filters.Regex('(facebook\.com)\/((photo\/[\S]+)|(groups\/([\w\.]+\/permalink\/[\d]+))|([\w\.]+)\/(posts)\/[\w]+)') & ~filters.COMMAND, facebook_dl, block=False))

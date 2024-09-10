@@ -18,7 +18,7 @@ class TelethonModuleByME():
         # Function to send video to chat
     # Function to send audio to chat
     last_edit_time = 0  # Initialize the last edit time as 0
-        
+    past_size = 0
 
     async def send_audio_to_chat(audio_file_path, update, context, title):
         with Loader("Uploading Long Video : ", "Uploaded Successfully"):
@@ -86,7 +86,7 @@ class TelethonModuleByME():
                     video_file_path,
                     attributes=attributes,
                     supports_streaming=True,
-                    thumbnail=video_thumbnail_path,
+                    thumb=video_thumbnail_path,
                     # extra=extra_metadata,
                     progress_callback=lambda current, total: TelethonModuleByME.callback(current, total, context, message, title, video_file_path,message_text, typee='Video')
                 )
@@ -102,7 +102,6 @@ class TelethonModuleByME():
             size_index += 1
         return f"{size_in_bytes:.2f} {size_units[size_index]}"
     
-    last_edit_time = 0  # Initialize the last edit time as 0
     
     @staticmethod
     async def callback(current, total, context, message, title, file_path,extra_cap='', typee='File'):
@@ -121,27 +120,33 @@ class TelethonModuleByME():
         #         f"Size: {TelethonModuleByME.get_readable_file_size(file_path)}\n"
         #         f"{extra_cap}\n") if typee!='File' else title
         # else:
-        progress_message = (
-            f"🚀 Uploading {typee}: {title}\n\n"
-            f"Size: {TelethonModuleByME.get_readable_file_size(file_path)}\n"
-            f"Progress: {percentage:.2%}\n"
-            f"{extra_cap}\n"
-            f"[{progress_bar}]"
-            ) if typee!='File' else (
-            f"🚀 Uploading...\n\n"
-            f"{title}"
-            f"Progress: {percentage:.2%}\n"
-            f"[{progress_bar}]")
+
         
         try:
             current_time = time.time()  # Get the current time
-            time_since_last_edit = current_time - TelethonModuleByME.last_edit_time
-            
+            time_since_last_edit = current_time - TelethonModuleByME.last_edit_time            
             if time_since_last_edit < 10 and percentage<1.0:
                 pass
             elif percentage==1.0:
                 await message.delete()
             else:
+                past_size = past_size if 'past_size' in locals() else 0
+                current_size = current - past_size
+                past_size = current_size
+                speed= current_size/(1024*1024*10)
+                progress_message = (
+f"🚀 Uploading {typee}: {title}\n\n"
+f"Size: {TelethonModuleByME.get_readable_file_size(file_path)}\n"
+f"Progress: {percentage:.2%}\n"
+f"Speed: {speed:.2} MB/s\n"
+f"{extra_cap}\n"
+f"[{progress_bar}]"
+) if typee!='File' else (
+f"🚀 Uploading...\n\n"
+f"{title}"
+f"Progress: {percentage:.2%}\n"
+f"Speed: {speed:.2} MB/s\n"
+f"[{progress_bar}]")
                 await message.edit_text(progress_message, parse_mode='HTML' if typee!='File' else 'MARKDOWN', disable_web_page_preview=True)
                 TelethonModuleByME.last_edit_time = current_time  # Update the last edit time
 

@@ -43,7 +43,7 @@ async def short_vid_download(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="upload_video")
             with Loader("Uploading Tiktok/YtShort : ","Tiktok/YtShort Upload Success"):
                 video_duration, video_dimensions, video_thumbnail_path = extract_media_info(filename, 'video')
-                await update.message.reply_video(video=open(filename, 'rb'),duration=video_duration, caption=CAPTION,allow_sending_without_reply=True, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumb=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
+                await update.message.reply_video(video=open(filename, 'rb'),duration=video_duration, caption=CAPTION,allow_sending_without_reply=True, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumbnail=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="cancel")
             os.remove(filename)
     print("%50s"%"Done\n")
@@ -72,7 +72,8 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     try:
                         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="upload_video")
                         video_duration, video_dimensions, video_thumbnail_path = extract_media_info(filename, 'video')
-                        await update.message.reply_video(video=open(filename, 'rb'),duration=video_duration, caption=CAPTION,allow_sending_without_reply=True, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumb=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
+                        # print(video_thumbnail_path)
+                        await update.message.reply_video(video=open(filename, 'rb'),duration=video_duration, caption=CAPTION,allow_sending_without_reply=True, disable_notification=True, width=video_dimensions.get('width', 0), height=video_dimensions.get('height', 0),thumbnail=open(video_thumbnail_path,'rb'), parse_mode='HTML', supports_streaming=True)
                         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="cancel")
                     except Exception as e:
                         print(e)

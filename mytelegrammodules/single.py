@@ -14,7 +14,13 @@ chatid = list(clientjson.keys())
 base_url = "https://api.telegram.org/bot{}/sendMessage?parse_mode=MARKDOWN".format(
     API_HASH
 )
-update = "This Bot (@dalbhatpowerbot) started working again. \n Maintenance of bot is costly. If you want to support us you can always do it [here](https://www.buymeacoffee.com/prabesharyal). \n\n Thank You For Your Support🙏!"
+update = """‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ ‎ ‎ ‎__(NEW UPDATE!!)__
+ This is to inform you that we've pushed some updates to the bot. 
+ 
+ ‎ ‎ ‎ ‎ ‎ ‎ ‎***Changelogs:***
+\t - Added Tiktok Photo Group Posts Downloader
+ 
+ \n\n Maintenance of bot is costly. If you want to support us you can always do it [here](https://www.buymeacoffee.com/prabesharyal). \n\n Thank You For Your Support🙏!"""
 
 # update = """‎ ‎ ‎ ‎ ‎ ‎ ‎***@DalBhatPowerBot*** \n‎ ‎ ‎ ‎ ‎ ‎ ‎__(NEW UPDATE!!)__
 # This is to inform you that the bot has started working again and we've pushed some updates.\n

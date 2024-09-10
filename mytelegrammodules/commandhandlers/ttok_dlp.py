@@ -54,7 +54,7 @@ async def send_and_all(update, context, check, caption, filelist, url):
                     video_thumbnail_path,
                 ) = extract_media_info(filename, "video")
                 with Loader(
-                    "Uploading Instagram Video", "Instagram Video Upload Success"
+                    "Uploading Tiktok Video", "Tiktok Video Upload Success"
                 ):
                     await context.bot.send_chat_action(
                         chat_id=update.effective_chat.id, action="upload_video"
@@ -67,7 +67,7 @@ async def send_and_all(update, context, check, caption, filelist, url):
                         disable_notification=True,
                         width=video_dimensions.get("width", 0),
                         height=video_dimensions.get("height", 0),
-                        thumb=open(video_thumbnail_path, "rb"),
+                        thumbnail=open(video_thumbnail_path, "rb"),
                         parse_mode="HTML",
                         supports_streaming=True,
                     )
@@ -77,7 +77,7 @@ async def send_and_all(update, context, check, caption, filelist, url):
 
             if filename.endswith(("jpg", "webp", "heic")):
                 with Loader(
-                    "Uploading Instagram Photo", "Instagram Photo Upload Success"
+                    "Uploading Tiktok Photo", "Tiktok Photo Upload Success"
                 ):
                     await context.bot.send_chat_action(
                         chat_id=update.effective_chat.id, action="upload_photo"
@@ -126,8 +126,8 @@ async def send_and_all(update, context, check, caption, filelist, url):
                         chat_id=update.effective_chat.id, action="cancel"
                     )
             with Loader(
-                "Uploading Instagram Media Group",
-                "Instagram Media Group Upload Success",
+                "Uploading Tiktok Media Group",
+                "Tiktok Media Group Upload Success",
             ):
                 for media_chunks in media_group_splitter(media_group):
                     await update.message.reply_media_group(
@@ -156,11 +156,12 @@ async def tiktok_dl(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     shutil.rmtree(os.path.join(os.getcwd(), "downloads"), ignore_errors=True)
     try:
         only_necesssary_regex = (
-            r"(tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+)|(vt\).tiktok\.com/[-a-zA-Z0-9]+)"
+            r"((tiktok\.com\/@[-a-z\.A-Z0-9_]+\/(video|photo)\/\d+)|(vt\.tiktok\.com\/[-a-zA-Z0-9]+))"
         )
         links = re.findall(only_necesssary_regex, update.message.text)
+        # print(links)
         if len(links) == 0:
-            toreply = "Please send a Proper Instagram Post Or Reels Link\n\tNote : Profiles and Highlights are not yet Supported_"
+            toreply = "Please send a Proper Tiktok Post Or Reels Link\n\tNote : Stories Are Not Yet Supported_"
             await update.message.reply_markdown(
                 toreply,
                 allow_sending_without_reply=True,
@@ -170,6 +171,8 @@ async def tiktok_dl(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         else:
             for link in links:
                 url = "https://" + link[0]
+                print("url to be downloaded :" + url)
+                url = url.replace('photo','video')
                 check, caption, filelist = tt_dlp(url).download()
                 await send_and_all(update, context, check, caption, filelist, url)
         shutil.rmtree(os.path.join(os.getcwd(), "downloads"), ignore_errors=True)
