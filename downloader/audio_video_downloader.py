@@ -64,7 +64,7 @@ class theOPDownloader():
         # twitter_regex = r"https?://(?:\w+\.)?twitter\.com/\w+/status/(\d+)"
         try:
             ydl_opts = {
-                'max_filesize':49000000,
+                'max_filesize':2000000000,
                 'format_sort': ['res:1080','ext:mp4:m4a'],
                 # 'format_sort': ['ext:mp4:m4a'],
                 'no_playlist': True,
@@ -92,28 +92,9 @@ class theOPDownloader():
             print(e)
             return "Couldn't download Video", None, False
     
-    def get_page_title(self, url):
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an exception for bad status codes (4xx and 5xx)
-
-            # Find the position of the opening and closing <title> tags
-            start_index = response.text.find('<title>')
-            end_index = response.text.find('</title>')
-
-            if start_index != -1 and end_index != -1:
-                start_index += len('<title>')
-                return response.text[start_index:end_index]
-            else:
-                return None  # No title tag found
-
-        except requests.exceptions.RequestException as e:
-            print("Couldn't Get Caption so replacing with ✨")
-            return "✨"
-    
     def short_vids(self,link,*args):
         try:
-            instagram_reels_pattern = r"(?:https?://)?(?:(?:www|m)\.)?instagram\.com/reel(s)?/[-a-zA-Z0-9_]+"
+            instagram_reels_pattern = r"(?:https?://)?(?:(?:www|m)\.)?instagram\.com/reels/[-a-zA-Z0-9_]+"
             youtube_shorts_pattern = r"(?:https?://)?(?:(?:www|m)\.)?(?:youtu(?:be\.com/shorts/|\.be/))[-a-zA-Z0-9]+"
             tiktok_pattern = r"(?:https?://)?(?:(?:www|m)\.)?(?:tiktok\.com/@[-a-zA-Z0-9_]+/video/\d+|vt\.tiktok\.com/[-a-zA-Z0-9]+)"
             #tiktok_pattern
@@ -128,15 +109,12 @@ class theOPDownloader():
                         'restrictfilenames': True,
                         'outtmpl': 'downloads/%(title)s.%(ext)s',
                         'format' : 'mp4',
-                        "cookiefile": "cookies/ig_cookies.txt",
                         }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link, download=True)
                 filepath=ydl.prepare_filename(info)
                 video_title = info['title']
             filepath = os.path.join(os.getcwd(), filepath)
-            if re.match(instagram_reels_pattern,link):
-                video_title = self.get_page_title(link)
             video_title = self.caption if video_title == '' else video_title
             video_title = self.convert_html(video_title)
             CAPTION = '<a href="{}">{}</a>'.format(link,video_title)
