@@ -41,11 +41,9 @@ from NEPAL.dict.nepali_dict import NepaliDictionary
 from NEPAL.calendar.rasifal import NepaliRashiFal
 from NEPAL.calendar.nepali_calendar import nepalSpecialTimes
 from mytelegrammodules.database.databasemanager import DBMSSimple
-from NEPAL.NEPSE.nepse import NepalStock
 
 from downloader.audio_video_downloader import theOPDownloader
 from downloader.instagram import *
-from downloader.general import *
 
 
 from utils.vid_aud_metadata import *
