@@ -21,3 +21,6 @@ myenv/
 secrets.json
 config.local.json
 mytelegrammodules/database/db.json
+
+.claude/
+db.json

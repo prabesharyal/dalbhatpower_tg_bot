@@ -1,16 +1,15 @@
-
-# Importing Secrets
+"""DalBhatPower bot entry point."""
 import dotenv
+
 dotenv.load_dotenv()
-import mytelegrammodules.bot as bot
+
+from bot.app import run
 
 
+def main() -> None:
+    print("Starting bot...")
+    run()
 
-
-def startbot():
-    print("Starting bot... ")
-    bot.main()
-    
 
 if __name__ == "__main__":
-    startbot()
+    main()
